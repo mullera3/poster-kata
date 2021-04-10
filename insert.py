@@ -77,9 +77,6 @@ class InsertDB(object):
 
         tables = cur.fetchall()
 
-        for table in tables:
-            print(table,"\n")
-
         con.close()
 
         return tables
