@@ -11,7 +11,10 @@ import numpy as np
 import requests
 
 class InsertDB(object):
-
+    """
+        Class to handle insertions and deletion to postgres db
+        db is sitting on docker container at port 5432
+    """
     def __init__(self, hostname, user, password,dbname):
         self.host = hostname
         self.user = user
@@ -21,6 +24,7 @@ class InsertDB(object):
 
 
     def open_connection(self):
+        #open connections to database
 
         con = psycopg2.connect(
             host=self.host,
@@ -36,6 +40,7 @@ class InsertDB(object):
         return con, cur
 
     def show_databases(self):
+        #shows current databases 
         con, cur = self.open_connection()
         command = ("SELECT datname FROM pg_database;")
 
@@ -48,6 +53,7 @@ class InsertDB(object):
         return dbs
 
     def create_table_posters(self):
+        #creates tables for posters to be stored into
         tablename = "posters"
         con, cur = self.open_connection()
 
@@ -68,6 +74,7 @@ class InsertDB(object):
         cur.execute(command)
 
     def show_tables(self):
+        #shows all tables in database
         con, cur = self.open_connection()
         command = (
             """SELECT table_name FROM information_schema.tables
@@ -82,6 +89,8 @@ class InsertDB(object):
         return tables
 
     def insert_into_source(self, tablename ,poster_content, quantity, price, email, sales_rep, promo_code):
+        #inserts rows in to source database
+        #expects certain information to complete queries as well as being in the right database
         if self.database == "dw":
             return "wrong db"
 
@@ -94,6 +103,7 @@ class InsertDB(object):
         con.close()
 
     def create_db(self,name):
+        #create db on server
         con, cur = self.open_connection()
 
         try:
@@ -106,6 +116,7 @@ class InsertDB(object):
         con.close()
 
     def show_table_data(self,tablename):
+        #shows all rows currently in table
         con, cur = self.open_connection()
 
         command = (
@@ -118,6 +129,7 @@ class InsertDB(object):
         return table_data
 
     def drop_table(self,tablename):
+        #drops table from database
         con, cur = self.open_connection()
 
         command = ("""DROP TABLE IF EXISTS {};""".format(tablename))
@@ -127,6 +139,7 @@ class InsertDB(object):
         con.close()
 
     def filter_posters_table(self):
+        #grabs poster content field from database and return a list of the data in the field
         if self.database == "dw":
             return "wrong db"
 
@@ -149,6 +162,8 @@ class InsertDB(object):
         return names
 
     def create_dw_films_table(self):
+        #creates table in dw 
+        #checks to see if user is in correct database
         if self.database == "source":
             return "wrong db"
 
@@ -172,6 +187,7 @@ class InsertDB(object):
         con.close()
 
     def insert_into_films(self, movie_title, episode_id, director_name, release_date, poster_content):
+        #inserts data in the films table in dw 
         if self.database == "source":
             return "wrong db"
 
@@ -203,10 +219,12 @@ db = InsertDB(hostname, user, password, database)
 
 
 def random_char(y):
+    #create random emails for fake data
     return ''.join(random.choice(string.ascii_letters) for x in range(y))
 
 
 def parse_starwars_names(json_data):
+    #grabs name of ships from json
     names = []
     
     for k in json_data.keys():
@@ -221,6 +239,7 @@ def parse_starwars_names(json_data):
 
 
 def secure_rand(len=8):
+    #create promo code
     token = os.urandom(len)
     return base64.b64encode(token)
 

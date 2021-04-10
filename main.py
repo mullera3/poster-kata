@@ -4,6 +4,7 @@ import requests
 import json
 
 def parse_films_data(json_data,ship):
+    # parse json data and returns a dict and a chunk of the json from the url
     row_dict = {}
     for k in json_data.keys():
         if k == "results":
@@ -21,6 +22,8 @@ def parse_films_data(json_data,ship):
 
 
 def get_film_urls(film_data,row_dict):
+    #loops through list of films urls and grabs data
+    #pass data to function which parse it and creates a dict
     for i in film_data:
         url = i
         r = requests.get(url)
@@ -33,6 +36,8 @@ def get_film_urls(film_data,row_dict):
             
 
 def join_data(film_urls,row_dict):
+    #joins the data from api with poster content from other db
+    #parses data and creates and dict which keys store into database by key-pair value
     title = ""
     episode_id = 0
     director = ''
@@ -47,9 +52,11 @@ def join_data(film_urls,row_dict):
         elif key == "release_date":
             row_dict[key] = film_urls[key]
 
+    #inserting info into database
     db2.insert_into_films(row_dict["title"], row_dict["episode_id"], row_dict["director"], row_dict["release_date"],row_dict["name"])
 
 def grabFilmUrls(ship):
+    #grabs films list for specific ship 
     films = None
     for i in ship.keys():
         if i == "films":
@@ -60,6 +67,7 @@ def grabFilmUrls(ship):
 
 if __name__ == "__main__":
 
+    #database info
     hostname = "localhost"
     user = "postgres"
     password = "postgres"
@@ -70,7 +78,7 @@ if __name__ == "__main__":
     db = InsertDB(hostname, user, password, d1)
     global db2
     db2 = InsertDB(hostname, user, password, d2)
-
+    #
     poster_table = db.show_table_data("posters")
     ship_names = db.filter_posters_table()
 
